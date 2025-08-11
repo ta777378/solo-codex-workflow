@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# 設定: TESTS変更を許可したい場合のみ ALLOW_TEST_CHANGES=1 を環境変数で渡す
+if [ "${ALLOW_TEST_CHANGES:-0}" != "1" ]; then
+  if git diff --cached --name-only | grep -qE '^tests/'; then
+    echo "❌ tests/ の変更はローカルで禁止されています（ALLOW_TEST_CHANGES=1 で一時解除可）"
+    exit 1
+  fi
+fi
+exit 0

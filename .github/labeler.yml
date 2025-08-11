@@ -1,0 +1,10 @@
+role:tester:
+  - 'tests/**'
+
+role:coder:
+  - 'src/**'
+  - 'agent/**'
+  - '.github/**'
+  - 'README.md'
+  - 'AGENT.md'
+  - 'requirements*.txt'
