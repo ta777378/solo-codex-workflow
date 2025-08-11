@@ -1,0 +1,36 @@
+name: Auto label PR by changed paths
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply labels by path
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true
+
+      - name: Enforce exclusive role label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = (await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            })).data.map(l=>l.name);
+            const hasCoder = labels.includes('role:coder');
+            const hasTester = labels.includes('role:tester');
+            if (!hasCoder && !hasTester) {
+              core.setFailed('No role label. Please add role:coder or role:tester');
+            }
+            if (hasCoder && hasTester) {
+              core.setFailed('Both role labels present. Keep exactly one: role:coder or role:tester');
+            }
