@@ -21,3 +21,13 @@ GitHub Actions によるCI/CD、PRラベルによる変更範囲制限、安全�
 - [Codexの使い方](docs/codex.md)
 - [言語/フレームワーク切替](docs/language-switch.md)
 - [詳細仕様](docs/spec.md)
+
+## Codexの実行（ディレクトリ連動）
+
+- **実装作業**: `cd src && ./codex.sh`
+  - Coderモードで実行され、`src/**` 以外の変更はローカルのガードとPRゲートでブロックされます
+- **テスト作業（基本は人間）**: `cd tests` で手動編集
+  - 特殊ケースでCodexにテスト生成を試す場合は `cd tests && ./codex.sh`（Testerモード）
+- **テンプレ保守**: `.github/` や `agent/` で編集 → PRには `role:coder` ラベル
+
+> PRは必ずラベル（`role:coder` / `role:tester`）を付けてください。ゲートが役割と変更範囲を検証します。
