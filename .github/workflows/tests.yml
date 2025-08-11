@@ -7,7 +7,6 @@ on:
     branches: [ main ]
 
 jobs:
-  # PR時だけロールと変更範囲を検査
   gate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -30,17 +29,20 @@ jobs:
           labels="${{ steps.labels.outputs.labels }}"
           echo "Labels: $labels"
           if [[ "$labels" != *"role:coder"* && "$labels" != *"role:tester"* ]]; then
-            echo "❌ 必要ラベルがありません（role:coder か role:tester を付与してください）"; exit 1; fi
+            echo "❌ 必要ラベルがありません（role:coder または role:tester を付与）"; exit 1; fi
+
+          # coder: tests/ を触ったら失敗
           if [[ "$labels" == *"role:coder"* ]]; then
             if grep -E '^tests/' changed.txt; then
               echo "❌ coder PR は tests/ を変更できません"; exit 1; fi
           fi
+
+          # tester: tests/ とDocs以外を触ったら失敗
           if [[ "$labels" == *"role:tester"* ]]; then
             if grep -vE '^(tests/|AGENT.md$|README.md$|.github/|requirements.*)$' changed.txt | grep .; then
               echo "❌ tester PR は tests/ とドキュメント以外を変更できません"; exit 1; fi
           fi
 
-  # PR時のテスト（gate通過が前提）
   test_pr:
     if: github.event_name == 'pull_request'
     needs: [gate]
@@ -56,9 +58,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
       - name: Run tests
-        run: pytest -q
+        run: PYTHONPATH=. python -m pytest -q
 
-  # push時のテスト（従来どおり）
   test_push:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -73,4 +74,4 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
       - name: Run tests
-        run: pytest -q
+        run: PYTHONPATH=. python -m pytest -q

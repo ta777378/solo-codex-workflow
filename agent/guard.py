@@ -7,7 +7,10 @@ def main():
     ap.add_argument("diff", help="unified diff file (patch.diff)")
     args = ap.parse_args()
 
-    allowed = {"CODER": ["src/"], "TESTER": ["tests/", "AGENT.md", "README.md", ".github/", "requirements.txt"]}
+    allowed = {
+        "CODER": ["src/"],
+        "TESTER": ["tests/", "AGENT.md", "README.md", ".github/", "requirements.txt"]
+    }
     ok_prefixes = allowed[args.role]
 
     txt = Path(args.diff).read_text(encoding="utf-8", errors="ignore")
